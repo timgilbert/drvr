@@ -29,3 +29,22 @@ config :logger, backends: [RingLogger]
 if Mix.target() != :host do
   import_config "target.exs"
 end
+
+# Hmm
+node_name = if Mix.env() != :prod, do: "drivr_fw"
+
+config :nerves_init_gadget,
+  mdns_domain: "nerves.local",
+  node_name: node_name,
+  node_host: :mdns_domain,
+  ifname: "wlan0",
+  address_method: :dhcp
+
+key_mgmt = System.get_env("NERVES_NETWORK_KEY_MGMT") || "WPA-PSK"
+
+config :nerves_network, :default,
+  wlan0: [
+    ssid: System.get_env("NERVES_NETWORK_SSID"),
+    psk: System.get_env("NERVES_NETWORK_PSK"),
+    key_mgmt: String.to_atom(key_mgmt)
+  ]
